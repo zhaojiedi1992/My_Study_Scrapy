@@ -110,3 +110,34 @@ def process_chain(callbacks, input, *a, **kw):
     return d
 
 创建一个deferred对象， 添加一系列的成功回调方法， 然后执行所有的成功回调。 返回deffered对象。 
+
+
+def process_chain_both(callbacks, errbacks, input, *a, **kw):
+    """Return a Deferred built by chaining the given callbacks and errbacks"""
+    d = defer.Deferred()
+    for cb, eb in zip(callbacks, errbacks):
+        d.addCallbacks(cb, eb, callbackArgs=a, callbackKeywords=kw,
+            errbackArgs=a, errbackKeywords=kw)
+    if isinstance(input, failure.Failure):
+        d.errback(input)
+    else:
+        d.callback(input)
+    return d
+
+这个方法， 创建一个deferred对象， 添加成功和失败回调对。 
+如果input是成功的就调用成功回调， 失败调用失败的回调。 
+
+def process_parallel(callbacks, input, *a, **kw):
+    """Return a Deferred with the output of all successful calls to the given
+    callbacks
+    """
+    dfds = [defer.succeed(input).addCallback(x, *a, **kw) for x in callbacks]
+    d = defer.DeferredList(dfds, fireOnOneErrback=1, consumeErrors=1)
+    d.addCallbacks(lambda r: [x[1] for x in r], lambda f: f.value.subFailure)
+    return d
+遍历 callbacks列表， 使用addcallback添加成功的回调。 
+defer.succeed(input) 应该是返回一个deferred对象。 
+查看下官方api。 
+Function 	succeed 	Return a Deferred that has already had .callback(result) called.
+现获取一个dfds 的数组， 然后转为list ， 再有2个参数。
+添加2个匿名的回调方法。
