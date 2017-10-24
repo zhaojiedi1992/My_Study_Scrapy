@@ -89,3 +89,4 @@ class MySpider(scrapy.Spider):
 ```
 我们使用命令行传递过来的参数，默认会直接设置self.category=category ,我们不需要再设置的。这个在我们的start_urls不确定，需要传递的参数才能确认的时候才用的。
 
+## 源码分析
