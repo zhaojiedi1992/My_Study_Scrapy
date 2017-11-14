@@ -244,3 +244,29 @@ loader.add_value('name', u'name: foo', TakeFirst(), re='name: (.+)')
 ```
 这个，在调用add_value的时候， 先调用get_value函数，得到foo
 如果没之前没有设置过name字段， 就添加一个，如果有，调用_add_value.合并到在loader的对应name字段中列表中。
+### replace_value(field_name, value, *processors, **kwargs)
+这个很好立即的。 上面我们使用add是添加到列表中， 这个是替换了。
+```python
+ def replace_value(self, field_name, value, *processors, **kw):
+        value = self.get_value(value, *processors, **kw)
+        if value is None:
+            return
+        if not field_name:
+            for k, v in six.iteritems(value):
+                self._replace_value(k, v)
+        else:
+            self._replace_value(field_name, value)
+def _replace_value(self, field_name, value):
+    self._values.pop(field_name, None)
+    self._add_value(field_name, value)
+```
+如果原来使用过add_value,使用pop原来的。然后使用add_value去添加。
+
+#### get_xpath(xpath, *processors, **kwargs)
+这个和get_value类似。 只是这个地方接受的是一个xpath表达式。不是现在的value值。
+#### add_xpath(field_name, xpath, *processors, **kwargs)
+这个和add_value类似
+#### replace_xpath(field_name, xpath, *processors, **kwargs)
+这个是和replace_value类似
+
+**同样也有css的一套方法，这里就不写了，太麻烦了**
