@@ -15,25 +15,34 @@ regex是正则表达式，callback是对应的回调方法，样例使用`sitema
 
 ### parse_row(response, row)
 这是个核心方法，类似baseSpider的parse方法，返回一个
-## 样例
+## 样例1
 ```python
-from scrapy.spiders import CSVFeedSpider
-from myproject.items import TestItem
+from scrapy.spiders import SitemapSpider
 
-class MySpider(CSVFeedSpider):
-    name = 'example.com'
-    allowed_domains = ['example.com']
-    start_urls = ['http://www.example.com/feed.csv']
-    delimiter = ';'
-    quotechar = "'"
-    headers = ['id', 'name', 'description']
+class MySpider(SitemapSpider):
+    sitemap_urls = ['http://www.example.com/sitemap.xml']
+    sitemap_rules = [
+        ('/product/', 'parse_product'),
+        ('/category/', 'parse_category'),
+    ]
 
-    def parse_row(self, response, row):
-        self.logger.info('Hi, this is a row!: %r', row)
+    def parse_product(self, response):
+        pass # ... scrape product ...
 
-        item = TestItem()
-        item['id'] = row['id']
-        item['name'] = row['name']
-        item['description'] = row['description']
-        return item
+    def parse_category(self, response):
+        pass # ... scrape category ...
+```
+## 样例2
+```python
+from scrapy.spiders import SitemapSpider
+
+class MySpider(SitemapSpider):
+    sitemap_urls = ['http://www.example.com/robots.txt']
+    sitemap_rules = [
+        ('/shop/', 'parse_shop'),
+    ]
+    sitemap_follow = ['/sitemap_shops']
+
+    def parse_shop(self, response):
+        pass # ... scrape shop here ...
 ```
