@@ -356,7 +356,7 @@ get_output_value这个方法，获取到指定字段的输出处理器，执行�
 
 #### context
 这个item加载器的当前上下文， 这个说起来比较不好理解。我们在创建一个子加载器（使用nest_css,nst_xpaht）的时候，他的上下文环境和父加载的器的环境肯定是不同的。
-```
+```python
     def nested_xpath(self, xpath, **context):
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
@@ -366,3 +366,24 @@ get_output_value这个方法，获取到指定字段的输出处理器，执行�
         return subloader
 ```
 这个代码上面已经看过了，context.updat更新了选择器，环境和父选择器不一样的。但是只有的item对象还是引用的一个。不管多少个子加载器，都是为我们的item对象服务的。
+
+#### default_item_class
+默认的item类
+```python
+ default_item_class = Item
+```
+我们的加载器使用的默认item类是Item。
+### default_input_processor
+```python
+    default_input_processor = Identity()
+```
+### default_output_processor
+```python
+    default_output_processor = Identity()
+```
+### default_selector_class
+```python
+ default_selector_class = Selector
+```
+### selector
+加载器当前的选择器。
