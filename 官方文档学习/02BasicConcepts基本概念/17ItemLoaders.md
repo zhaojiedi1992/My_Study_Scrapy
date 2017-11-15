@@ -270,3 +270,99 @@ def _replace_value(self, field_name, value):
 这个是和replace_value类似
 
 **同样也有css的一套方法，这里就不写了，太麻烦了**
+
+#### load_item()
+数据的数据，通过输出处理器处理后，给item的每个字段。最终返回item。
+````python
+    def load_item(self):
+        item = self.item
+        for field_name in tuple(self._values):
+            value = self.get_output_value(field_name)
+            if value is not None:
+                item[field_name] = value
+
+        return item
+    def get_output_value(self, field_name):
+        proc = self.get_output_processor(field_name)
+        proc = wrap_loader_context(proc, self.context)
+        try:
+            return proc(self._values[field_name])
+        except Exception as e:
+            raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" % \
+                (field_name, self._values[field_name], type(e).__name__, str(e)))
+```
+这个load_item，从代码上看，self._values这个dict就是我们前面获取到的数据都在这个里面，遍历字段名，每个字段都是需要调用
+get_out_value方法去获取到值，最终赋值到item对象的对应字段上去。
+get_output_value这个方法，获取到指定字段的输出处理器，执行输出处理器。返回值就是self._values[field_name]经过输出处理器处理后的结果了。
+也就是我们最终要赋值给item对象对应字段的值。
+
+#### nested_xpath(xpath)
+这个方法就是创建一个嵌套的加载器， 我们默认是使用itemload对象，然后各种add_path,add_css这样的。
+```python
+    def nested_xpath(self, xpath, **context):
+        selector = self.selector.xpath(xpath)
+        context.update(selector=selector)
+        subloader = self.__class__(
+            item=self.item, parent=self, **context
+        )
+        return subloader
+```
+我们默认的选择器选择的是在整个文档里面的。 这个nested_xpath，搜索区域只是在xpath里面的。相对整个文档只是一小部分。
+#### nested_css(css)
+这个和上面基本一样，就是使用的css的。
+
+#### get_collected_values(field_name)
+字面上就是获取到收集到的值
+```python
+    def get_collected_values(self, field_name):
+        return self._values[field_name]
+```
+代码也是很简单，我们使用add_xpath,等操作。数据都是放在加载器里面，也就是self._values里面。这是个字典。 这个方法就是从字典里面去对应的字段而已。
+
+#### get_output_value(field_name)
+前面已经看过这个代码了。 就是获取到字段最终的值，也就是给item对应字段赋值的值。 
+
+#### get_input_processor(field_name)
+```python
+    def get_input_processor(self, field_name):
+        proc = getattr(self, '%s_in' % field_name, None)
+        if not proc:
+            proc = self._get_item_field_attr(field_name, 'input_processor', \
+                self.default_input_processor)
+        return proc
+    def _get_item_field_attr(self, field_name, key, default=None):
+        if isinstance(self.item, Item):
+            value = self.item.fields[field_name].get(key, default)
+        else:
+            value = default
+        return value
+```
+先去找对应字段加in的字段，如果有，就返回。 没有就获取input_processor的。也没有就使用ItemLoader的默认的。
+如果我们想设置name字段的输入处理器， 我们只需要设置name_in=一个函数即可。
+获取到对应的字段的输入处理器，如果没有设置就使用默认的输入处理器。返回一个处理器。这个_get_item_field_attr方法其实和我们使用字典去获取字段值几乎一样，这里只是加了一个是否是Item对象的判断而已。
+#### get_output_processor(field_name)
+```python
+    def get_output_processor(self, field_name):
+        proc = getattr(self, '%s_out' % field_name, None)
+        if not proc:
+            proc = self._get_item_field_attr(field_name, 'output_processor', \
+                self.default_output_processor)
+        return proc
+```
+获取到对应的字段的输出处理器，如果没有设置就使用默认的输入处理器。返回一个处理器
+代码分析基本和in的差不多。 
+#### item
+这个是加载器最终要返回的对象，我们loader加载器，辛辛苦苦工作就是为了让item各个字段填充慢慢的。
+
+#### context
+这个item加载器的当前上下文， 这个说起来比较不好理解。我们在创建一个子加载器（使用nest_css,nst_xpaht）的时候，他的上下文环境和父加载的器的环境肯定是不同的。
+```
+    def nested_xpath(self, xpath, **context):
+        selector = self.selector.xpath(xpath)
+        context.update(selector=selector)
+        subloader = self.__class__(
+            item=self.item, parent=self, **context
+        )
+        return subloader
+```
+这个代码上面已经看过了，context.updat更新了选择器，环境和父选择器不一样的。但是只有的item对象还是引用的一个。不管多少个子加载器，都是为我们的item对象服务的。
