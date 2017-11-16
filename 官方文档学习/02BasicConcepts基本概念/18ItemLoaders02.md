@@ -219,3 +219,12 @@ u'bar'
 第一种情况，我们处理的是一个join字符串，所以肯定需要一个json.loads的方法转化为json对象，json对象的提取需要使用Selectmes。组合一下就可以了。'{"foo": "bar"}'==>{"foo": "bar"}==>'bar'
 
 第二种情况：数据处理流程基本如下： '[{"foo":"bar"}, {"baz":"tar"}]'==>[{"foo":"bar"}, {"baz":"tar"}]==>['bar']+[]
+
+### 总结
+
+item加载器就是为填充item而存在的。 其实我们可以自己这样写，item=Product(),item["name"]=response.css("div p::text"),这种方式去自己构造我们的item。但是这种方式没有使用item加载器优雅，且item加载器可以设置写输入输出处理器，方便数据的处理。使用继承也能提高我们代码的重用率。相信大家水平的提高，会越来月爱上item加载器的使用的。
+
+你可以看下不使用加载器的代码：[https://github.com/zhaojiedi1992/quotesbot](https://github.com/zhaojiedi1992/quotesbot)
+使用加载器的代码： [https://github.com/zhaojiedi1992/quotesbot_v2](https://github.com/zhaojiedi1992/quotesbot_v2)
+这2个代码都不是我自己写的， 第一个就是直接把官方网址的那个demo fork过来的。 第二个就是在scrapyhub上创建一个portial项目，配置完毕下载的scrapy的代码提交到github上的。
+大家可以借鉴下第二种写法。可扩展性很高。
