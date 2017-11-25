@@ -37,3 +37,5 @@ mailer.send(to=["someone@example.com"], subject="Some subject", body="Some body"
 * MAIL_PASS:认证密码
 * MAIL_TLS:连接使用SSL/TSL
 * MAIL_SSL:强制使用ssl连接
+
+
