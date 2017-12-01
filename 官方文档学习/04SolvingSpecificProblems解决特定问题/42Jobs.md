@@ -9,7 +9,7 @@
  ```
  scrapy crawl somespider -s JOBDIR=crawls/somespider-1
  ```
-停止他， 你需要ctrl -c或者发送一个信号，重启启动
+停止他， 你需要ctrl -c 或者发送一个信号，重启启动
 ```
 scrapy crawl somespider -s JOBDIR=crawls/somespider-1
 ```
