@@ -46,4 +46,4 @@ def other_callback(self, response):
     print "the argument passed is:", somearg
 ```
 
-如果你想了解到那些请求没i有别序列化， 可以设置SCHEDULER_DEBUG=True来启动调度调试获取更详细的信息.
+如果你想了解到那些请求没有别序列化， 可以设置SCHEDULER_DEBUG=True来启动调度调试获取更详细的信息.
